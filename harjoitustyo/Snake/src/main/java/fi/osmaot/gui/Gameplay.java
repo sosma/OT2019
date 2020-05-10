@@ -28,7 +28,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     private final int mapXSize = 34;
     private final int mapYSize = 17;
 
-    public int snakeSize;
+    private int snakeSize;
     
     private boolean gameState;
 
@@ -49,12 +49,13 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     private int foodXPos;
     private int foodYPos;
 
-    private Logic logic = new Logic();
+    private Logic logic;
     Database database = new Database();
 
     private ImageIcon title;
 
     public Gameplay() {
+        logic = new Logic();
         logic.reset();
         updateVariables();
         database.createHighScoreTable();
@@ -104,16 +105,16 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     }
 
     private void paintFood(Graphics g) {
-        foodImage = new ImageIcon("Images/food.png");
+        foodImage = new ImageIcon("../Images/food.png");
         foodImage.paintIcon(this, g, foodPossibleXPos[foodXPos], foodPossibleYPos[foodYPos]);
 
     }
 
     private void paintSnake(Graphics g) {
-        snakeImage = new ImageIcon("Images/snake.png");
+        snakeImage = new ImageIcon("../Images/snake.png");
         snakeImage.paintIcon(this, g, snakeXLenght[0], snakeYLenght[0]);
         for (int i = 0; i < snakeSize; i++) {
-            snakeImage = new ImageIcon("Images/snake.png");
+            snakeImage = new ImageIcon("../Images/snake.png");
             snakeImage.paintIcon(this, g, snakeXLenght[i], snakeYLenght[i]);
 
         }
