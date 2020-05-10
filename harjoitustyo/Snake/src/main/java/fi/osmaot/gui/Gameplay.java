@@ -1,6 +1,5 @@
 package fi.osmaot.gui;
 
-
 import fi.osmaot.logic.Logic;
 import fi.osmaot.database.Database;
 import java.awt.Color;
@@ -17,8 +16,8 @@ import javax.swing.Timer;
 /**
  *
  * @author osma
- * 
- * Contains methods for handling the gui for this project
+ *
+ * Contains methods for handling the GUI for this project
  */
 public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
@@ -29,7 +28,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     private final int mapYSize = 17;
 
     private int snakeSize;
-    
+
     private boolean gameState;
 
     private int[] foodPossibleXPos;
@@ -46,25 +45,30 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     private ImageIcon snakeImage;
     private ImageIcon foodImage;
 
+    private final String tablename = "SCORES";
+    
     private int foodXPos;
     private int foodYPos;
 
-    private Logic logic;
+    private Logic logic = new Logic();
     Database database = new Database();
 
     private ImageIcon title;
 
+    /**
+     * Constructor for the UI class
+     */
     public Gameplay() {
         logic = new Logic();
         logic.reset();
         updateVariables();
-        database.createHighScoreTable();
+        database.createHighScoreTable(tablename);
         foodPossibleXPos = new int[mapXSize];
         foodPossibleYPos = new int[mapYSize];
         for (int i = 1; i <= mapXSize; i++) {
             foodPossibleXPos[i - 1] = i * 25;
         }
-        for (int i = 3; i <= mapYSize+2; i++) {
+        for (int i = 3; i <= mapYSize + 2; i++) {
             foodPossibleYPos[i - 3] = i * 25;
         }
         addKeyListener(this);
@@ -75,6 +79,9 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
         timer.start();
     }
 
+    /**
+     * updates ui classes variables according to logic class to draw accurately
+     */
     public void updateVariables() {
         foodXPos = logic.getFoodXPos();
         foodYPos = logic.getFoodYPos();
@@ -88,6 +95,8 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
         g.setColor(Color.white);
         g.drawRect(24, 10, 851, 55);
         title = new ImageIcon("Images/text.jpg");
+        title.paintIcon(this, g, 25, 11);
+        title = new ImageIcon("../Images/text.jpg");
         title.paintIcon(this, g, 25, 11);
 
         g.setColor(Color.white);
@@ -105,29 +114,28 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     }
 
     private void paintFood(Graphics g) {
-        foodImage = new ImageIcon("../Images/food.png");
-        foodImage.paintIcon(this, g, foodPossibleXPos[foodXPos], foodPossibleYPos[foodYPos]);
+        g.setColor(Color.green);
+        g.drawRect(foodPossibleXPos[foodXPos], foodPossibleYPos[foodYPos], 25, 25);
 
     }
 
     private void paintSnake(Graphics g) {
-        snakeImage = new ImageIcon("../Images/snake.png");
-        snakeImage.paintIcon(this, g, snakeXLenght[0], snakeYLenght[0]);
+        g.setColor(Color.red);
+
         for (int i = 0; i < snakeSize; i++) {
-            snakeImage = new ImageIcon("../Images/snake.png");
-            snakeImage.paintIcon(this, g, snakeXLenght[i], snakeYLenght[i]);
+            g.drawRect(snakeXLenght[i], snakeYLenght[i], 25, 25);
 
         }
     }
 
     private void paintHighscores(Graphics g) {
-        database.addHighScore(snakeSize - 3);
+        database.addHighScore(snakeSize - 3, tablename);
         g.setColor(Color.white);
         g.setFont(new Font("arial", Font.BOLD, 24));
         g.drawString("Your final score: " + (snakeSize - 3), 300, 100);
         g.drawString("Top scores! ", 300, 150);
         int spot = 200;
-        int[] scores = database.loadHighScores();
+        int[] scores = database.loadHighScores(tablename);
         for (int score : scores) {
             g.drawString((spot - 150) / 50 + " : " + score, 300, spot);
             spot += 50;
@@ -135,6 +143,11 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
     }
 
+    /**
+     *
+     * @param g Graphics
+     * paints everything on screen
+     */
     public void paint(Graphics g) {
         g.clearRect(0, 0, getWidth(), getHeight());
         updateVariables();
@@ -149,9 +162,9 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
         // paint food
         paintFood(g);
-        
+
         // paint highscores
-        if(!gameState) {
+        if (!gameState) {
             paintHighscores(g);
         }
 
@@ -162,6 +175,11 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     public void keyTyped(KeyEvent e) {
     }
 
+    /**
+     *
+     * @param e KeyEvent
+     * detects what key is pressed and sends it to the logic engine
+     */
     @Override
     public void keyPressed(KeyEvent e
     ) {
@@ -190,11 +208,16 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     ) {
     }
 
+    /**
+     *
+     * @param e ActionEvent
+     * gameloop
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         timer.start();
         gameState = logic.gameLogic();
-        if(!gameState) {
+        if (!gameState) {
             timer.stop();
         }
         repaint();

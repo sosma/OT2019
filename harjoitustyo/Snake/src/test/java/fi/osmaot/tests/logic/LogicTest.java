@@ -18,28 +18,29 @@ import static org.junit.Assert.*;
  * @author osma
  */
 public class LogicTest {
-     Logic logic;
+
+    Logic logic;
+
     public LogicTest() {
         logic = new Logic();
         logic.reset();
     }
-    
+
     @BeforeClass
     public static void setUpClass() {
     }
-    
+
     @AfterClass
     public static void tearDownClass() {
     }
-    
+
     @Before
     public void setUp() {
     }
-    
+
     @After
     public void tearDown() {
     }
-
 
     @Test
     public void changeToOppositeDirectionTest() {
@@ -50,8 +51,37 @@ public class LogicTest {
         assertEquals(125, logic.getSnakeXLenght()[0]);
     }
     @Test
-    public void checkHitDetectionFalse() {
+    public void movementTest() {
+        logic.setDirection(1); // go right
+        logic.gameLogic();
+        logic.setDirection(3); // go up
+        logic.gameLogic();
+        logic.setDirection(2); // go left
+        logic.gameLogic();
+        logic.setDirection(4); // go down
+        logic.gameLogic();
+        //Snake head should now be at its starting position
+        assertEquals(100, logic.getSnakeXLenght()[0]);
+        assertEquals(100, logic.getSnakeYLenght()[0]);
+
+    }
+    // test a scenario where the game should be running normally
+    @Test
+    public void endGameDetectionFalse() {
         logic.setDirection(1);
         assertTrue(logic.gameLogic());
     }
+
+    // in this scenario the snake will hit itself and therefore gameLogic should be false
+    @Test
+    public void endGameDetectionTrue() {
+        logic.setDirection(1);
+        for (int i = 0; i < 100; i++) {
+            logic.eatFoodForTesting();
+            logic.gameLogic();
+        }
+        assertFalse(logic.gameLogic());
+    }
+    
+
 }

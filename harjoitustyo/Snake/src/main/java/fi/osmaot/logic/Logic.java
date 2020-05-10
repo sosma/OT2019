@@ -184,6 +184,12 @@ public class Logic {
         }
     }
 
+    /**
+     *
+     * @param direction takes an integer between 1 and 4 as input to determine direction.
+     * tells the snake to go right, left, up or down. 
+     * 1 is right, 2 is left, 3 is up, 4 is down
+     */
     public void setDirection(int direction) {
         //right
         if (direction == 1) {
@@ -225,6 +231,11 @@ public class Logic {
 
     }
 
+    /**
+     *
+     * @return true if game keeps running, false if it is a gameover
+     *  responsible for all the logic of the game
+     */
     public boolean gameLogic() {
         moveSnake();
         if (testSnakeCrash()) {
@@ -234,6 +245,13 @@ public class Logic {
             eatFood();
         }
         return true;
+    }
+
+    /**
+     * A method purely for testing
+     */
+    public void eatFoodForTesting() {
+        eatFood();
     }
 
 }
