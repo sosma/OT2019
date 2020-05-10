@@ -1,6 +1,14 @@
+package fi.osmaot;
+
+import fi.osmaot.gui.Gameplay;
 import java.awt.Color;
 import javax.swing.JFrame;
 
+/**
+ *
+ * @author osma
+ * Main class of this project
+ */
 public class Main {
     public static void main(String[] args) {
         JFrame screen = new JFrame();

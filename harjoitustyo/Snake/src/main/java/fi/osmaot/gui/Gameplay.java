@@ -1,4 +1,8 @@
+package fi.osmaot.gui;
 
+
+import fi.osmaot.logic.Logic;
+import fi.osmaot.database.Database;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -6,17 +10,27 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Random;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+/**
+ *
+ * @author osma
+ * 
+ * Contains methods for handling the gui for this project
+ */
 public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
     private int[] snakeXLenght;
     private int[] snakeYLenght;
 
-    public int snakeSize = 3;
+    private final int mapXSize = 34;
+    private final int mapYSize = 17;
+
+    public int snakeSize;
+    
+    private boolean gameState;
 
     private int[] foodPossibleXPos;
     private int[] foodPossibleYPos;
@@ -27,7 +41,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     private boolean down = false;
 
     private Timer timer;
-    private int speed = 50;
+    private final int speed = 100;
 
     private ImageIcon snakeImage;
     private ImageIcon foodImage;
@@ -41,35 +55,35 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     private ImageIcon title;
 
     public Gameplay() {
-        logic.Reset();
-        UpdateVariables();
+        logic.reset();
+        updateVariables();
         database.createHighScoreTable();
-        foodPossibleXPos = new int[34];
-        foodPossibleYPos = new int[17];
-        for (int i = 1; i <= 34; i++) {
+        foodPossibleXPos = new int[mapXSize];
+        foodPossibleYPos = new int[mapYSize];
+        for (int i = 1; i <= mapXSize; i++) {
             foodPossibleXPos[i - 1] = i * 25;
         }
-        for (int i = 3; i <= 19; i++) {
+        for (int i = 3; i <= mapYSize+2; i++) {
             foodPossibleYPos[i - 3] = i * 25;
         }
         addKeyListener(this);
         setFocusable(true);
         setFocusTraversalKeysEnabled(false);
         timer = new Timer(speed, this);
-        logic.Reset();
+        logic.reset();
         timer.start();
     }
 
-    public void UpdateVariables() {
-        foodXPos = logic.GetFoodXPos();
-        foodYPos = logic.GetFoodYPos();
-        snakeYLenght = logic.GetSnakeyLenght();
-        snakeXLenght = logic.GetSnakexLenght();
-        snakeSize = logic.GetSnakeSize();
+    public void updateVariables() {
+        foodXPos = logic.getFoodXPos();
+        foodYPos = logic.getFoodYPos();
+        snakeYLenght = logic.getSnakeYLenght();
+        snakeXLenght = logic.getSnakeXLenght();
+        snakeSize = logic.getSnakeSize();
 
     }
 
-    private void PaintBackground(Graphics g) {
+    private void paintBackground(Graphics g) {
         g.setColor(Color.white);
         g.drawRect(24, 10, 851, 55);
         title = new ImageIcon("Images/text.jpg");
@@ -82,20 +96,20 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
         g.fillRect(25, 75, 850, 575);
     }
 
-    private void PaintScore(Graphics g) {
+    private void paintScore(Graphics g) {
         g.setColor(Color.black);
         g.setFont(new Font("arial", Font.BOLD, 16));
         g.drawString("Score: " + (snakeSize - 3), 780, 50);
 
     }
 
-    private void PaintFood(Graphics g) {
+    private void paintFood(Graphics g) {
         foodImage = new ImageIcon("Images/food.png");
         foodImage.paintIcon(this, g, foodPossibleXPos[foodXPos], foodPossibleYPos[foodYPos]);
 
     }
 
-    private void PaintSnake(Graphics g) {
+    private void paintSnake(Graphics g) {
         snakeImage = new ImageIcon("Images/snake.png");
         snakeImage.paintIcon(this, g, snakeXLenght[0], snakeYLenght[0]);
         for (int i = 0; i < snakeSize; i++) {
@@ -105,7 +119,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
         }
     }
 
-    private void PaintHighscores(Graphics g) {
+    private void paintHighscores(Graphics g) {
         database.addHighScore(snakeSize - 3);
         g.setColor(Color.white);
         g.setFont(new Font("arial", Font.BOLD, 24));
@@ -122,24 +136,22 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
     public void paint(Graphics g) {
         g.clearRect(0, 0, getWidth(), getHeight());
-        UpdateVariables();
-
-        boolean state = logic.GameLogic();
+        updateVariables();
 
         // paint game window
-        PaintBackground(g);
+        paintBackground(g);
         // paint score
-        PaintScore(g);
+        paintScore(g);
 
         // paint snake
-        PaintSnake(g);
+        paintSnake(g);
 
         // paint food
-        PaintFood(g);
+        paintFood(g);
+        
         // paint highscores
-        if (!state) {
-            timer.stop();
-            PaintHighscores(g);
+        if(!gameState) {
+            paintHighscores(g);
         }
 
         g.dispose();
@@ -147,7 +159,6 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -155,21 +166,21 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     ) {
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             timer.start();
-            logic.Reset();
-            UpdateVariables();
+            logic.reset();
+            updateVariables();
 
         }
         if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            logic.SetDirection(1);
+            logic.setDirection(1);
         }
         if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            logic.SetDirection(2);
+            logic.setDirection(2);
         }
         if (e.getKeyCode() == KeyEvent.VK_UP) {
-            logic.SetDirection(3);
+            logic.setDirection(3);
         }
         if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-            logic.SetDirection(4);
+            logic.setDirection(4);
         }
     }
 
@@ -179,10 +190,12 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e
-    ) {
+    public void actionPerformed(ActionEvent e) {
         timer.start();
-        logic.MoveSnake();
+        gameState = logic.gameLogic();
+        if(!gameState) {
+            timer.stop();
+        }
         repaint();
 
     }

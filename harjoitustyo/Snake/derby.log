@@ -25,3 +25,20 @@ os.arch=amd64
 os.version=4.4.0-177-generic
 derby.system.home=/home/osma/ot2019/OT2019/harjoitustyo/Snake
 Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Sun May 10 12:42:17 EEST 2020:
+Shutting down instance dcd58064-0171-fbd1-6c43-00005465be0a on database directory /home/osma/ot2019/OT2019/harjoitustyo/Snake/snake_scores with class loader sun.misc.Launcher$AppClassLoader@3764951d 
+Sun May 10 12:42:17 EEST 2020 Thread[DRDAConnThread_6,5,main] (DATABASE = snake_scores), (DRDAID = {99}), Database 'snake_scores' shutdown.
+----------------------------------------------------------------
+Sun May 10 12:42:25 EEST 2020:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 47edc30b-0171-fbd1-6c43-00005465be0a 
+on database directory /home/osma/ot2019/OT2019/harjoitustyo/Snake/snake_scores with class loader sun.misc.Launcher$AppClassLoader@3764951d 
+Loaded from file:/home/osma/Downloads/db-derby-10.14.2.0-bin/lib/derby.jar
+java.vendor=Private Build
+java.runtime.version=1.8.0_242-8u242-b08-0ubuntu3~16.04-b08
+user.dir=/home/osma/Downloads/db-derby-10.14.2.0-bin
+os.name=Linux
+os.arch=amd64
+os.version=4.4.0-177-generic
+derby.system.home=/home/osma/ot2019/OT2019/harjoitustyo/Snake
+Database Class Loader started - derby.database.classpath=''

@@ -1,6 +1,11 @@
+package fi.osmaot.logic;
 
 import java.util.Random;
 
+/**
+ *
+ * @author osma contains methods for handling gameplay logic for this project
+ */
 public class Logic {
 
     private boolean left = false;
@@ -20,6 +25,9 @@ public class Logic {
 
     Random random = new Random();
 
+    /**
+     * Constructor for logic class
+     */
     public Logic() {
         foodPossibleXPos = new int[34];
         foodPossibleYPos = new int[17];
@@ -34,28 +42,31 @@ public class Logic {
 
     }
 
-    public int[] GetSnakexLenght() {
+    public int[] getSnakeXLenght() {
         return snakeXLenght;
     }
 
-    public int[] GetSnakeyLenght() {
+    public int[] getSnakeYLenght() {
         return snakeYLenght;
     }
 
-    public int GetFoodXPos() {
+    public int getFoodXPos() {
         return foodXPos;
     }
 
-    public int GetFoodYPos() {
+    public int getFoodYPos() {
         return foodYPos;
 
     }
 
-    public int GetSnakeSize() {
+    public int getSnakeSize() {
         return snakeSize;
     }
 
-    public void Reset() {
+    /**
+     * Resets all necessary values for starting a new game
+     */
+    public void reset() {
         snakeXLenght[2] = 50;
         snakeXLenght[1] = 75;
         snakeXLenght[0] = 100;
@@ -67,9 +78,11 @@ public class Logic {
         left = false;
         up = false;
         down = false;
+        foodXPos = random.nextInt(34);
+        foodYPos = random.nextInt(17);
     }
 
-    private boolean TestSnakeCrash() {
+    private boolean testSnakeCrash() {
         for (int i = 1; i < snakeSize; i++) {
             if (snakeXLenght[0] == snakeXLenght[i] && snakeYLenght[0] == snakeYLenght[i]) {
                 return true;
@@ -78,7 +91,7 @@ public class Logic {
         return false;
     }
 
-    public boolean TestEatFood() {
+    private boolean testEatFood() {
         if (foodPossibleXPos[foodXPos] == snakeXLenght[0]
                 && foodPossibleYPos[foodYPos] == snakeYLenght[0]) {
             foodXPos = random.nextInt(34);
@@ -88,7 +101,7 @@ public class Logic {
         return false;
     }
 
-    public void EatFood() {
+    private void eatFood() {
         snakeSize++;
         while (true) {
             for (int i = 1; i < snakeSize; i++) {
@@ -105,7 +118,7 @@ public class Logic {
 
     }
 
-    public void MoveSnake() {
+    private void moveSnake() {
         if (right) {
             for (int i = snakeSize - 1; i >= 0; i--) {
                 snakeYLenght[i + 1] = snakeYLenght[i];
@@ -171,7 +184,7 @@ public class Logic {
         }
     }
 
-    public void SetDirection(int direction) {
+    public void setDirection(int direction) {
         //right
         if (direction == 1) {
             if (!left) {
@@ -212,12 +225,13 @@ public class Logic {
 
     }
 
-    public boolean GameLogic() {
-        if (TestSnakeCrash()) {
+    public boolean gameLogic() {
+        moveSnake();
+        if (testSnakeCrash()) {
             return false;
         }
-        if (TestEatFood()) {
-            EatFood();
+        if (testEatFood()) {
+            eatFood();
         }
         return true;
     }

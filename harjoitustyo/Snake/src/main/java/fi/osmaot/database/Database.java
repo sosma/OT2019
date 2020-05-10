@@ -1,11 +1,18 @@
+package fi.osmaot.database;
 
-import java.sql.Array;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/**
+ *
+ * @author osma
+ * Contains methods for managing database communication for this project
+ * 
+ */
 public class Database {
 
     private static Statement statement;
@@ -17,6 +24,7 @@ public class Database {
             String username = "snake";
             String password = "snake";
             connection = DriverManager.getConnection(host, username, password);
+            System.out.println("worked");
         } catch (SQLException err) {
             System.out.println("could not load highscores");
         }
