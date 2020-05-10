@@ -13,63 +13,63 @@ import javax.swing.Timer;
 
 public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
-    private int[] snakexLenght = new int[750];
-    private int[] snakeyLenght = new int[750];
+    private int[] snakeXLenght;
+    private int[] snakeYLenght;
 
     public int snakeSize = 3;
 
-    private int[] foodxPos;
-    private int[] foodyPos;
+    private int[] foodPossibleXPos;
+    private int[] foodPossibleYPos;
 
     private boolean left = false;
     private boolean right = false;
     private boolean up = false;
     private boolean down = false;
 
-    private int moves = 0;
-
     private Timer timer;
-    private int speed = 100;
+    private int speed = 50;
 
     private ImageIcon snakeImage;
     private ImageIcon foodImage;
-    private Random random = new Random();
 
-    private int xpos = random.nextInt(34);
-    private int ypos = random.nextInt(17);
+    private int foodXPos;
+    private int foodYPos;
+
+    private Logic logic = new Logic();
     Database database = new Database();
 
     private ImageIcon title;
 
     public Gameplay() {
+        logic.Reset();
+        UpdateVariables();
         database.createHighScoreTable();
-        foodxPos = new int[34];
-        foodyPos = new int[17];
+        foodPossibleXPos = new int[34];
+        foodPossibleYPos = new int[17];
         for (int i = 1; i <= 34; i++) {
-            foodxPos[i - 1] = i * 25;
+            foodPossibleXPos[i - 1] = i * 25;
         }
         for (int i = 3; i <= 19; i++) {
-            foodyPos[i - 3] = i * 25;
+            foodPossibleYPos[i - 3] = i * 25;
         }
         addKeyListener(this);
         setFocusable(true);
         setFocusTraversalKeysEnabled(false);
         timer = new Timer(speed, this);
+        logic.Reset();
         timer.start();
     }
 
-    public void paint(Graphics g) {
-        g.clearRect(0, 0, getWidth(), getHeight());
+    public void UpdateVariables() {
+        foodXPos = logic.GetFoodXPos();
+        foodYPos = logic.GetFoodYPos();
+        snakeYLenght = logic.GetSnakeyLenght();
+        snakeXLenght = logic.GetSnakexLenght();
+        snakeSize = logic.GetSnakeSize();
 
-        if (moves == 0) {
-            snakexLenght[2] = 50;
-            snakexLenght[1] = 75;
-            snakexLenght[0] = 100;
-            snakeyLenght[2] = 100;
-            snakeyLenght[1] = 100;
-            snakeyLenght[0] = 100;
+    }
 
-        }
+    private void PaintBackground(Graphics g) {
         g.setColor(Color.white);
         g.drawRect(24, 10, 851, 55);
         title = new ImageIcon("Images/text.jpg");
@@ -80,55 +80,73 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
 
         g.setColor(Color.black);
         g.fillRect(25, 75, 850, 575);
+    }
 
+    private void PaintScore(Graphics g) {
         g.setColor(Color.black);
         g.setFont(new Font("arial", Font.BOLD, 16));
         g.drawString("Score: " + (snakeSize - 3), 780, 50);
 
+    }
+
+    private void PaintFood(Graphics g) {
+        foodImage = new ImageIcon("Images/food.png");
+        foodImage.paintIcon(this, g, foodPossibleXPos[foodXPos], foodPossibleYPos[foodYPos]);
+
+    }
+
+    private void PaintSnake(Graphics g) {
         snakeImage = new ImageIcon("Images/snake.png");
-
-        snakeImage.paintIcon(this, g, snakexLenght[0], snakeyLenght[0]);
-
+        snakeImage.paintIcon(this, g, snakeXLenght[0], snakeYLenght[0]);
         for (int i = 0; i < snakeSize; i++) {
             snakeImage = new ImageIcon("Images/snake.png");
-            snakeImage.paintIcon(this, g, snakexLenght[i], snakeyLenght[i]);
+            snakeImage.paintIcon(this, g, snakeXLenght[i], snakeYLenght[i]);
 
         }
-        foodImage = new ImageIcon("Images/food.png");
-        if (foodxPos[xpos] == snakexLenght[0] && foodyPos[ypos] == snakeyLenght[0]) {
-            snakeSize++;
-            xpos = random.nextInt(34);
-            ypos = random.nextInt(17);
-        }
-        for (int i = 1; i < snakeSize; i++) {
-            if (snakexLenght[0] == snakexLenght[i] && snakeyLenght[0] == snakeyLenght[i]) {
-                timer.stop();
-                database.addHighScore(snakeSize - 3);
-                g.setColor(Color.white);
-                g.setFont(new Font("arial", Font.BOLD, 24));
-                g.drawString("Your final score!: " + (snakeSize - 3), 300, 100);
-                g.drawString("Top scores: ", 300, 150);
-                int spot = 200;
-                int[] scores = database.loadHighScores();
-                for (int score : scores) {
-                    g.drawString((spot-150)/50+" : "+score, 300, spot);
-                    spot+=50;
-                }
-            }
-            if (foodxPos[xpos] == snakexLenght[i] && foodyPos[ypos] == snakeyLenght[i]) {
-                xpos = random.nextInt(34);
-                ypos = random.nextInt(17);
-            }
+    }
+
+    private void PaintHighscores(Graphics g) {
+        database.addHighScore(snakeSize - 3);
+        g.setColor(Color.white);
+        g.setFont(new Font("arial", Font.BOLD, 24));
+        g.drawString("Your final score: " + (snakeSize - 3), 300, 100);
+        g.drawString("Top scores! ", 300, 150);
+        int spot = 200;
+        int[] scores = database.loadHighScores();
+        for (int score : scores) {
+            g.drawString((spot - 150) / 50 + " : " + score, 300, spot);
+            spot += 50;
         }
 
-        foodImage.paintIcon(this, g, foodxPos[xpos], foodyPos[ypos]);
+    }
+
+    public void paint(Graphics g) {
+        g.clearRect(0, 0, getWidth(), getHeight());
+        UpdateVariables();
+
+        boolean state = logic.GameLogic();
+
+        // paint game window
+        PaintBackground(g);
+        // paint score
+        PaintScore(g);
+
+        // paint snake
+        PaintSnake(g);
+
+        // paint food
+        PaintFood(g);
+        // paint highscores
+        if (!state) {
+            timer.stop();
+            PaintHighscores(g);
+        }
 
         g.dispose();
     }
 
     @Override
-    public void keyTyped(KeyEvent e
-    ) {
+    public void keyTyped(KeyEvent e) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -137,46 +155,21 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     ) {
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             timer.start();
-            moves = 0;
-            snakeSize = 3;
-            repaint();
+            logic.Reset();
+            UpdateVariables();
 
         }
         if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            moves++;
-            if (!left) {
-                right = true;
-
-            }
-            up = false;
-            down = false;
+            logic.SetDirection(1);
         }
         if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            moves++;
-            if (!right) {
-                left = true;
-
-            }
-            up = false;
-            down = false;
+            logic.SetDirection(2);
         }
         if (e.getKeyCode() == KeyEvent.VK_UP) {
-            moves++;
-            if (!down) {
-                up = true;
-
-            }
-            left = false;
-            right = false;
+            logic.SetDirection(3);
         }
         if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-            moves++;
-            if (!up) {
-                down = true;
-
-            }
-            left = false;
-            right = false;
+            logic.SetDirection(4);
         }
     }
 
@@ -189,69 +182,7 @@ public class Gameplay extends JPanel implements KeyListener, ActionListener {
     public void actionPerformed(ActionEvent e
     ) {
         timer.start();
-        if (right) {
-            for (int i = snakeSize - 1; i >= 0; i--) {
-                snakeyLenght[i + 1] = snakeyLenght[i];
-            }
-            for (int i = snakeSize; i >= 0; i--) {
-                if (i == 0) {
-                    snakexLenght[i] = snakexLenght[i] + 25;
-                } else {
-                    snakexLenght[i] = snakexLenght[i - 1];
-                }
-                if (snakexLenght[i] > 850) {
-                    snakexLenght[i] = 25;
-                }
-            }
-
-        }
-        if (left) {
-            for (int i = snakeSize - 1; i >= 0; i--) {
-                snakeyLenght[i + 1] = snakeyLenght[i];
-            }
-            for (int i = snakeSize; i >= 0; i--) {
-                if (i == 0) {
-                    snakexLenght[i] = snakexLenght[i] - 25;
-                } else {
-                    snakexLenght[i] = snakexLenght[i - 1];
-                }
-                if (snakexLenght[i] < 25) {
-                    snakexLenght[i] = 850;
-                }
-            }
-
-        }
-        if (down) {
-            for (int i = snakeSize - 1; i >= 0; i--) {
-                snakexLenght[i + 1] = snakexLenght[i];
-            }
-            for (int i = snakeSize; i >= 0; i--) {
-                if (i == 0) {
-                    snakeyLenght[i] = snakeyLenght[i] + 25;
-                } else {
-                    snakeyLenght[i] = snakeyLenght[i - 1];
-                }
-                if (snakeyLenght[i] > 475) {
-                    snakeyLenght[i] = 75;
-                }
-            }
-
-        }
-        if (up) {
-            for (int i = snakeSize - 1; i >= 0; i--) {
-                snakexLenght[i + 1] = snakexLenght[i];
-            }
-            for (int i = snakeSize; i >= 0; i--) {
-                if (i == 0) {
-                    snakeyLenght[i] = snakeyLenght[i] - 25;
-                } else {
-                    snakeyLenght[i] = snakeyLenght[i - 1];
-                }
-                if (snakeyLenght[i] < 75) {
-                    snakeyLenght[i] = 475;
-                }
-            }
-        }
+        logic.MoveSnake();
         repaint();
 
     }
